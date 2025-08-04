@@ -49,23 +49,53 @@ async function getTopTracks(artistId, token) {
 
 // Call the functions and display results
 
-getAccessToken().then(async (token) => {
-  const artistId = "1Xyo4u8uXC1ZmMpatF05PJ"; // The Weeknd
-  const artist = await getArtistInfo(artistId, token);
-  const tracks = await getTopTracks(artistId, token);
+const artistId = "4tZwfgrHOc3mvqYlEYSvVi";
+const content = document.getElementById("content");
 
-  // Display artist info and top tracks in the HTML body
-  document.body.innerHTML += `
+let token = null;
+let artist = null;
+let tracks = null;
+
+getAccessToken().then(async (t) => {
+  token = t;
+  artist = await getArtistInfo(artistId, token);
+  tracks = await getTopTracks(artistId, token);
+  renderArtist();
+});
+
+// ====== Renders ======
+
+function renderArtist() {
+  content.innerHTML = `
     <h2>${artist.name}</h2>
     <p>Followers: ${artist.followers.total.toLocaleString()}</p>
     <p>Genres: ${artist.genres.join(", ")}</p>
     <img src="${artist.images[0].url}" alt="${artist.name}" width="200" />
+  `;
+}
 
+function renderTracks() {
+  content.innerHTML = `
     <h3>Top Tracks:</h3>
     <ul>
       ${tracks
-        .map((track) => `<li>${track.name} (${track.popularity}★)</li>`)
+        .map(
+          (track) => `
+        <li style="margin-bottom: 20px;">
+          <strong>${track.name}</strong> (${track.popularity}★)
+          <br/>
+          <img src="${track.album.images[1]?.url}" width="100" />
+          <br/>
+          <a href="${track.external_urls.spotify}" target="_blank">Open in Spotify</a>
+        </li>
+      `
+        )
         .join("")}
     </ul>
   `;
-});
+}
+
+// ====== Navigation ======
+
+document.getElementById("show-artist").addEventListener("click", renderArtist);
+document.getElementById("show-tracks").addEventListener("click", renderTracks);
